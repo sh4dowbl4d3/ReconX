@@ -4,30 +4,28 @@
   <img src="Screenshots/Screenshot1.png" alt="ReconX Screenshot" width="800">
 </p>
 
-A powerful CLI tool for network reconnaissance, vulnerability scanning, CVE lookup, risk assessment, and report generation —- all powered by Nmap.
+ReconX is a network reconnaissance CLI tool for host discovery, port scanning, CVE lookups, risk assessment, and report generation with Nmap.
 
 ## Features
 
-- **Host Discovery** -- ping sweeps, ARP scans, live host detection
-- **Port Scanning** -- SYN, TCP connect, full 65535 port scans
-- **Service Version Detection** -- fingerprint service versions
-- **OS Fingerprinting** -- remote OS detection with confidence scoring
-- **Stealth Scanning** -- decoys, fragmentation, MAC spoofing, source-port manipulation, custom TTL, badsum, timing templates
-- **NSE Vulnerability Scanning** -- Nmap Scripting Engine vuln scripts
-- **CVE Lookup** -- online CVE database enrichment (via CIRCL API) with local caching
-- **Risk Scoring** -- multi-factor risk assessment per host and overall
-- **Report Generation** -- HTML & PDF reports
-- **Scheduled Scanning** -- cron-based scheduling with daemon mode
-- **Interactive Menu** -- TUI mode for exploring scan results
-- **Dark Dashboard** -- standalone HTML dashboard for scan visualization
+- Host discovery using ping sweeps and ARP scans
+- Port scanning with SYN, TCP connect, and full 65,535-port scans
+- Service version fingerprinting and OS detection with confidence scoring
+- Evasion options including decoys, packet fragmentation, MAC spoofing, custom TTLs, and timing templates
+- Vulnerability scanning with the Nmap Scripting Engine (NSE)
+- CVE lookups via the CIRCL API with local caching
+- Multi-factor risk scoring for individual hosts and scan aggregates
+- Report export in HTML and PDF formats
+- Recurring scans via cron schedules and daemon mode
+- Terminal menu (TUI) and standalone HTML dashboard for viewing scan results
 
 ## Installation
 
 ### Prerequisites
 
-- **Python 3.8+**
-- **Nmap 7.x** — must be installed and on `PATH`
-- **pip** or **pipx** (recommended)
+- Python 3.8 or newer
+- Nmap 7.x installed and available on PATH
+- pip or pipx
 
 ### 1. Install Nmap
 
@@ -51,9 +49,9 @@ winget install InsecureCommunity.Nmap
 
 ### 2. Install ReconX
 
-#### Option A (recommended) — pipx
+#### Option A: pipx (recommended)
 
-Isolates ReconX in its own environment and makes the `reconx` command available globally.
+pipx installs ReconX into an isolated environment and exposes the `reconx` command globally.
 
 ```bash
 # Install pipx if needed
@@ -66,11 +64,11 @@ cd ReconX
 pipx install .
 ```
 
-After `pipx ensurepath`, restart your terminal or run `source ~/.bashrc`.
+After running `pipx ensurepath`, restart your terminal or reload your shell profile.
 
-#### Option B — pip install --user
+#### Option B: pip user install
 
-Installs into the user site-packages directory.
+Installs ReconX into your user site-packages directory.
 
 ```bash
 git clone https://github.com/sh4dowbl4d3/ReconX.git
@@ -78,7 +76,7 @@ cd ReconX
 pip install --user .
 ```
 
-Ensure `~/.local/bin` is on your `PATH`:
+Make sure `~/.local/bin` is in your `PATH`:
 
 ```bash
 # Linux
@@ -89,7 +87,7 @@ source ~/.bashrc
 # Add %APPDATA%\Python\Scripts to your PATH environment variable
 ```
 
-#### Option C — editable install (development)
+#### Option C: editable install for development
 
 ```bash
 git clone https://github.com/sh4dowbl4d3/ReconX.git
@@ -97,17 +95,17 @@ cd ReconX
 pip install -e .
 ```
 
-This links the source tree directly — changes take effect immediately but `reconx` is still available globally.
+This links the repository directly to your Python environment so local edits take effect immediately while keeping the `reconx` command available globally.
 
-### 3. Verify
+### 3. Verify installation
 
 ```bash
 reconx --help
 ```
 
-The `reconx` command is now available from any terminal, even after reboot, without activating a virtual environment.
+The `reconx` command is ready to use directly from any terminal session without activating a virtual environment.
 
-### 4. (Optional) PDF report support
+### 4. Optional PDF report support
 
 ```bash
 pip install fpdf2
@@ -115,9 +113,9 @@ pip install fpdf2
 pipx run reconx pip install fpdf2
 ```
 
-> **Note:** Data directory: scan results, reports, and CVE cache are stored in `~/.local/share/reconx/` (Linux), `~/Library/Application Support/reconx/` (macOS), or `%APPDATA%/reconx/` (Windows).
+Scan results, reports, and cached CVE data are saved in `~/.local/share/reconx/` on Linux, `~/Library/Application Support/reconx/` on macOS, or `%APPDATA%/reconx/` on Windows.
 
-## Quick Start
+## Quick start
 
 ```bash
 # Show help
@@ -126,15 +124,15 @@ reconx --help
 # Show version
 reconx --version
 
-# Scan a target (default action — no "scan" subcommand needed)
+# Scan a target directly (default action without subcommands)
 reconx example.com
 reconx 192.168.1.1
 reconx https://example.com
 
-# Interactive menu
+# Interactive terminal menu
 reconx menu
 
-# Full report
+# Full scan summary
 reconx all
 ```
 
@@ -142,59 +140,59 @@ reconx all
 
 ### Scanning
 
-The default action is to scan — just pass a target:
+Running `reconx` with a target starts a scan directly:
 
 ```bash
-# Basic scan (SYN scan on top 1000 ports + version + OS detection)
+# Basic scan (SYN scan on top 1,000 ports, service version detection, and OS detection)
 reconx example.com
 reconx 192.168.1.0/24
 
-# Quick scan — host discovery only
+# Quick scan for host discovery only
 reconx {Target} --quick
 
-# Deep scan — all 65535 ports
+# Deep scan across all 65,535 ports
 reconx {Target} --deep
 
-# Standard scan (explicit)
+# Explicit standard scan
 reconx {Target} --standard
 
-# Scan with banner grabbing
+# Scan with service banner grabbing
 reconx {Target} --banners
 ```
 
-### Stealth Scanning
+### Stealth scanning
 
 ```bash
-# Full stealth mode (SYN, slow timing, random decoys, fragmentation, random MAC)
+# Stealth mode with SYN scanning, slow timing, randomized decoys, packet fragmentation, and randomized MAC
 reconx target.com --stealth
 
-# Custom decoy IPs
+# Custom decoy IP addresses
 reconx 10.0.0.1 --decoy 10.0.0.2,10.0.0.3,10.0.0.4
 
-# Fragment packets + custom source port
+# Packet fragmentation with custom source port
 reconx {Target} --fragment --source-port 53
 
-# MAC spoofing + custom TTL + timing
+# MAC spoofing, custom TTL, and timing template
 reconx {Target} --spoof-mac 0 --ttl 64 --timing 1
 
 # Bad checksum scan
 reconx {Target} --badsum
 
-# Full stealth with all options
+# Combined stealth scan options
 reconx target.com --stealth --decoy RND:5 --source-port 1234 --data-length 100 --ttl 128
 
 # Stealth vulnerability scan
 reconx vuln-scan {Target} --stealth
 ```
 
-### Vulnerability Scanning
+### Vulnerability scanning
 
 ```bash
 # Run Nmap NSE vulnerability scripts
 reconx vuln-scan {Target}
 ```
 
-### CVE Lookup
+### CVE lookup
 
 ```bash
 # Lookup CVEs for all discovered services
@@ -204,14 +202,14 @@ reconx cve-lookup --all
 reconx cve-lookup --service ssh --version "OpenSSH 7.4"
 ```
 
-### Risk Assessment
+### Risk assessment
 
 ```bash
 # Show overall and per-host risk scores
 reconx risk-score
 ```
 
-### Report Generation
+### Report generation
 
 ```bash
 # HTML report
@@ -224,7 +222,7 @@ reconx report --pdf
 reconx report --html --output ./my_report.html
 ```
 
-### Scheduled Scanning
+### Scheduled scanning
 
 ```bash
 # List schedules
@@ -246,7 +244,7 @@ reconx schedule toggle 1
 reconx schedule daemon
 ```
 
-### Results Display
+### Results display
 
 ```bash
 reconx status        # Scan summary
@@ -260,7 +258,7 @@ reconx all           # Full report
 reconx menu          # Interactive menu
 ```
 
-### Data Management
+### Data management
 
 ```bash
 # Clear all cached scan data, raw output, reports, and CVE cache
@@ -281,7 +279,7 @@ pip uninstall reconx
 rm -rf ~/.local/share/reconx    # Linux (adjust for your OS)
 ```
 
-## Project Structure
+## Project structure
 
 ```
 ReconX/
@@ -296,20 +294,20 @@ ReconX/
 │   ├── report_gen.py       # HTML & PDF report generation
 │   ├── risk_scoring.py     # Multi-factor risk assessment engine
 │   └── scheduler.py        # Cron-based scan scheduler
-├── scans/                  # (legacy — data now stored in XDG dir)
-├── reports/                # (legacy — data now stored in XDG dir)
+├── scans/                  # (legacy directory; data now stored in XDG directory)
+├── reports/                # (legacy directory; data now stored in XDG directory)
 ├── requirements.txt        # Python dependencies
-└── README.md               # This file
+└── README.md
 ```
 
 ## Requirements
 
-- **Python 3.8+**
-- **Nmap 7.x** — must be installed and on `PATH`
-- **fpdf2** — optional, for PDF report generation
-- **pipx** — recommended for isolated global installation
+- Python 3.8 or newer
+- Nmap 7.x on PATH
+- fpdf2 (optional, required for PDF report exports)
+- pipx (optional, recommended for isolated CLI installation)
 
-### Data Storage
+### Data storage
 
 | Platform | Data directory |
 |---|---|
@@ -347,12 +345,12 @@ ReconX/
                     └───────────────┘
 ```
 
-## Security Notes
+## Security notes
 
-- Scanning networks without explicit authorization is illegal in most jurisdictions
-- Stealth features are designed for authorized penetration testing and CTF environments only
-- All scan results are stored locally; no data is sent to third parties (CVE lookups use the public CIRCL API)
-- Input validation is enforced on all targets to prevent shell injection
+- Scan only networks and systems that you have explicit authorization to test.
+- Stealth features are intended for authorized security assessments and CTF environments.
+- Scan data is stored locally. Service names and version strings query the public CIRCL API during CVE lookups.
+- Target inputs are validated before execution to prevent command injection.
 
 ## License
 
